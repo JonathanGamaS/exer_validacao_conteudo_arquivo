@@ -1,0 +1,1 @@
+# exer_validacao_conteudo_arquivo
