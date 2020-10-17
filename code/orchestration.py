@@ -4,6 +4,9 @@ import datetime
 arquivo = open(r"data_file.txt", "r+")
 
 
+class LayoutException(Exception):
+    pass
+
 def verificando_arquivo_retornando_validos(arquivo):
     try:
         conteudo_valido = []
@@ -15,6 +18,8 @@ def verificando_arquivo_retornando_validos(arquivo):
                 conteudo_valido.append(valor_valido)
         conteudo_valido_sem_duplicidade_mensagem = verificando_duplicidade_mensagem(conteudo_valido)
         return conteudo_valido_sem_duplicidade_mensagem
+    except IndexError as e:
+        raise LayoutException(f"Layout invalido para ser utilizado: {e}")
     except Exception as e:
         raise e
 
