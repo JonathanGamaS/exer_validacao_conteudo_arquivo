@@ -1,21 +1,19 @@
 import requests
 import datetime
-from collections import Counter
+
+arquivo = open(r"data_file.txt", "r+")
 
 
-def verificando_arquivo_retornando_validos():
+def verificando_arquivo_retornando_validos(arquivo):
     try:
         conteudo_valido = []
-        file = open(r"data_file.txt", "r+")
-        conteudo = file.readlines()
+        conteudo = arquivo.readlines()
         for linha in conteudo:
             valores_linha = linha.split(';')
             valor_valido = verificador_dados(valores_linha)
             if valor_valido:
                 conteudo_valido.append(valor_valido)
-        print(conteudo_valido)
         conteudo_valido_sem_duplicidade_mensagem = verificando_duplicidade_mensagem(conteudo_valido)
-        print(conteudo_valido_sem_duplicidade_mensagem)
         return conteudo_valido_sem_duplicidade_mensagem
     except Exception as e:
         raise e
@@ -24,24 +22,15 @@ def verificando_arquivo_retornando_validos():
 def verificando_duplicidade_mensagem(lista_mensagens_aptas):
     lista_aptas_sem_duplicidade = []
     lista_duplicados = []
-    registros_duplicados = Counter(lista['telefone'] for lista in lista_mensagens_aptas)
-    for key, value in registros_duplicados.items():
-        if value > 1:
-            for registro in lista_mensagens_aptas:
-                if registro["telefone"] == key:
-                    lista_duplicados.append(registro)
-                else:
-                    id_mensagem = registro["id_mensagem"]
-                    id_broker = registro["id_broker"]
-                    formato_response = f"{id_mensagem};{id_broker}"
-                    lista_aptas_sem_duplicidade.append(formato_response)
-    primeiro_registro_lista_duplicados = lista_duplicados[0]
-    for linha in lista_duplicados[1:]:
-        if primeiro_registro_lista_duplicados["hora_registro"] < linha["hora_registro"]:
-            id_mensagem = primeiro_registro_lista_duplicados["id_mensagem"]
-            id_broker = primeiro_registro_lista_duplicados["id_broker"]
-            formato_response = f"{id_mensagem};{id_broker}"
-            lista_aptas_sem_duplicidade.append(formato_response)
+    for item in lista_mensagens_aptas:
+        for chave, valor in item.items():
+            if chave == "telefone":
+                if valor not in lista_duplicados:
+                    lista_duplicados.append(valor)
+                    id_mensagem = item["id_mensagem"]
+                    id_broker = item["id_broker"]
+                    retorno_esperado = f"{id_mensagem};{id_broker}"
+                    lista_aptas_sem_duplicidade.append(retorno_esperado)
     return lista_aptas_sem_duplicidade
 
 
@@ -113,4 +102,4 @@ def verificador_black_list(telefone):
 
 
 if __name__ == '__main__':
-    verificando_arquivo_retornando_validos()
+    verificando_arquivo_retornando_validos(arquivo)
