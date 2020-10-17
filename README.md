@@ -1,87 +1,38 @@
-# Teste dev
+# Teste
 
-Baseado nas regras propostas a aplicação deverá ler um arquivo e retornar as mensagens aptas para envio(que não foram bloqueadas) e seu respectivo broker.
+Baseado nas regras propostas, criei um arquivo .txt com várias entradas. A aplicação se encarrega de ler o arquivo, eliminar os registro que não são necessários e retornar uma lista com os registros no layout definido.
 
-O arquivo de entrada tem o seguinte layout:
+### Descrição do fluxo da aplicação
 
-_IDMENSAGEM;DDD;CELULAR;OPERADORA;HORARIO_ENVIO;MENSAGEM_ 
+* O fluxo se inicia na "função verificando_arquivo_retornando_validos", ela quem vai receber o conteúdo do arquivo, e enviar para a função "verificador_dados";
+* A função "verificador_dados" é a função principal, que vai guiar a outras funções que fazem cumprir as regras propostas no teste. Abaixo a descrição de cada função verificadora que está no fluxo de "verificar_dados":
+* validando_numero_oferecido - Verifica se o numero de telefone é válido, verificando todas as regras propostas no teste. 
+* verificador_tamanho_mensagem - Verifica se o tamanho da mensagem não é maior que o valor permitido.
+* verificador_tempo - Verifica se o horário esta dentro do horário acertado para ser válido.
+* verificar_retornar_id_broker - Verifica e retorna o nome da operadora vinculada a valor vindo do arquivo.
+* verificador_black_list - Acessa o endpoint disponibilizado para averiguar se o número de telefone está na blacklist.
+* Após as devidas verificações, os registros que retornam da função "verificador_dados" é enviado a função "verificando_duplicidade_mensagem", ela verifica mais de um registro para o mesmo número, e deixa somente um para cada numero, além de formatar para o layout final desejado e inserir os registros numa fila.
 
-Exemplo:
-```
-bff58d7b-8b4a-456a-b852-5a3e000c0e63;12;996958849;NEXTEL;21:24:03;sapien sapien non mi integer ac neque duis bibendum
-b7e2af69-ce52-4812-adf1-395c8875ad30;46;950816645;CLARO;19:05:21;justo lacinia eget tincidunt eget
-e7b87f43-9aa8-414b-9cec-f28e653ac25e;34;990171682;VIVO;18:35:20;dui luctus rutrum nulla tellus in sagittis dui
-c04096fe-2878-4485-886b-4a68a259bac5;43;940513739;NEXTEL;14:54:16;nibh fusce lacus purus aliquet at feugiat
-d81b2696-8b62-4b8b-af82-586ce0875ebc;21;983522711;TIM;16:42:48;sit amet eros suspendisse accumsan tortor quis turpis sed ante
-```
+### Testes Unitários
 
-Esperamos que o retorno seja apresentado seguindo o layout abaixo:
+* Desenvolvi dois testes unitários, um que verifica o fluxo da aplicação e se a saída esta vindo como uma lista. E outro que verifica se a aplicação lança uma exception caso o arquivo possua um conteúdo inválido para uso.
 
-_IDMENSAGEM;IDBROKER_
 
-Exemplo:
-```
-e7b87f43-9aa8-414b-9cec-f28e653ac25e;1
-d81b2696-8b62-4b8b-af82-586ce0875ebc;1
-```
+### Como executar
 
-## Regras
+* Deixei adaptado o arquivo que criei para executar a aplicação, é necessário somente executar o arquivo orchestration na pasta code. 
+* Lembrando que foi construido dessa maneira pois é uma execução local. No caso de um ambiente serverless Amazon por exemplo, seria necessário adaptar para receber o evento, se viria via front ou de um trigger do s3.
 
-* mensagens com telefone inválido deverão ser bloqueadas(DDD+NUMERO);
-* mensagens que estão na _blacklist_ deverão ser bloqueadas; _(ver blacklist)_
-* mensagens para o estado de São Paulo deverão ser bloqueadas;
-* mensagens com agendamento após as 19:59:59 deverão ser bloqueadas;
-* as mensagens com mais de 140 caracteres deverão ser bloqueadas;
-* caso possua mais de uma mensagem para o mesmo destino, apenas a mensagem apta com o menor horário deve ser considerada;
-* o id_broker será definido conforme a operadora; _(ver broker x operadora)_
 
-### Broker de envio
+### Como executar os testes
 
-Cada broker será responsável pelo envio de algumas operadoras, representado pela tabela abaixo:
+* Os testes foram feitos com base no unnitest, sendo necessário somente executar o arquivo test_fluxo_verificador_dados_arquivo.py
 
-| ID_BROKER | OPERADORAS |
-|-----------|------------|
-|   1       |  VIVO, TIM |
-|   2       |  CLARO, OI |
-|   3       |  NEXTEL    |
 
-### Consulta de blacklist
+### Descrição de linguagem, IDE, libs e etc
 
-```
-https://front-test-pg.herokuapp.com/blacklist/:phone
-```
-Possíveis retornos:
-* Se retornar 200, está na blacklist.
-* Se retornar 404 não está na blacklist.
+* A linguagem utilizada foi python, é a que possuo mais experiência para resolver o teste.
+* IDE utilizada foi o Pycharm, é a IDE que utilizo a mais de dois anos, e atende todas minhas necessidades, principalmente para testes locais em aplicações serverless.
+* Em questão de libs, utilizei datetime para comparar os horários. Requests para acessar o endpoint disponível que informa se o número de telefone esta na blacklist. E Unnitest para os testes unitários.
 
-### Número de telefone celular válido
 
-```
- DDD + CELULAR
-```
-* DDD com 2 digitos;
-* DDD deve ser válido;
-* número celular deve conter 9 dígitos;
-* numero celular deve começar com 9;
-* o segundo dígito deve ser > 6;
-
-Exemplos:
-
-* 41987563653 - ok
-* **00**987563653 - nok
-* 419**2**7563653 - nok
-* 41**8**87563653 - nok
-
-## O que será avaliado?
-
-* Lógica de programação
-* Clean code
-
-## O que esperamos?
-
-* Testes unitários;
-* Documentação do código;
-* README do projeto;
-* Instruções de como executar;
-* Instruções de como testar;
-* Descrição do que utilizou para desenvolver _(linguagem, SO, editor de texto/IDE, libs e etc)_.
